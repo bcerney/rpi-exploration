@@ -1,0 +1,78 @@
+
+Setup microSD
+https://www.raspberrypi.org/documentation/configuration/wireless/headless.md
+https://dev.to/limal/i-forgot-to-buy-a-micro-hdmi-cable-for-my-raspberry-pi-4-2ocf
+
+# Find SD card reader path
+sudo fdisk -l
+
+# gparted to erase disk
+gparted
+
+# Device > Create Partition Table...: single partition, max capacity, ext4 format
+
+# Write Raspian image to SD
+sudo dd if=/path/to/raspbian-.img of=/dev/path/to/card bs=4M conv=fsync
+
+Enable SSH/Wifi
+
+# dd utility created two partitions: boot and roofs
+# go to boot, create 'ssh' file to allow SSH
+touch ssh
+
+# create wifi config
+touch wpa_supplicant.conf
+---
+country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+    ssid="Your network name, e.g. BTHub1-123QWE"
+    psk="Y0ur_P455w0rd"
+    key_mgmt=WPA-PSK
+}
+---
+
+# Find pi via nmap
+sudo nmap -sS -p 22 192.168.1.0/24 | grep "Nmap scan"
+
+# SSH into pi
+ssh pi@192.168.1.X
+
+#passwd to change
+passwd
+
+# updates
+sudo apt update && sudo apt upgrade
+
+
+---
+Installed systemd unit for VNC Server in Service Mode daemon
+Start or stop the service with:
+  systemctl (start|stop) vncserver-x11-serviced.service
+Mark or unmark the service to be started at boot time with:
+  systemctl (enable|disable) vncserver-x11-serviced.service
+
+Installed systemd unit for VNC Server in Virtual Mode daemon
+Start or stop the service with:
+  systemctl (start|stop) vncserver-virtuald.service
+Mark or unmark the service to be started at boot time with:
+  systemctl (enable|disable) vncserver-virtuald.service
+---
+
+https://www.raspberrypi.org/documentation/remote-access/vnc/
+https://42bots.com/tutorials/access-raspberry-pi-terminal-and-desktop-remotely-with-ssh-and-vnc/
+
+
+
+# install
+sudo apt-get install tightvncserver
+
+# run vnc, set password
+tightvncserver
+
+# start session after boot
+vncserver :1 -geometry 1920x1080 -depth 24
+
+# install remmina
