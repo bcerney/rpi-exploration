@@ -1,0 +1,93 @@
+# Find SD card reader path
+sudo fdisk -l
+
+# gparted to erase disk
+gparted
+
+# Device > Create Partition Table...: single partition, max capacity, ext4 format
+
+# Write Raspian image to SD
+sudo dd if=/path/to/raspbian-.img of=/dev/path/to/card bs=4M conv=fsync
+
+# Enable SSH/Wifi
+
+# dd utility created two partitions: boot and roofs
+# go to boot, create 'ssh' file to allow SSH
+touch ssh
+
+# create wifi config
+touch wpa_supplicant.conf
+---
+country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+    ssid="Your network name, e.g. BTHub1-123QWE"
+    psk="Y0ur_P455w0rd"
+    key_mgmt=WPA-PSK
+}
+---
+
+# Find pi via nmap
+sudo nmap -sS -p 22 192.168.1.0/24 | grep "Nmap scan"
+
+# SSH into pi
+ssh pi@192.168.1.X
+
+#passwd to change
+passwd
+
+# updates
+sudo apt update && sudo apt upgrade
+
+# Install Docker
+# https://docs.docker.com/install/linux/docker-ce/debian/#install-using-the-convenience-script
+
+#For Raspbian, installing using the repository is not yet supported. You must instead use the convenience script.
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker pi
+newgroup docker
+
+# Setup NextCloudPi
+# https://docs.nextcloudpi.com/en/how-to-get-started-with-ncp-docker/
+
+docker pull ownyourbits/nextcloudpi-armhf
+
+# Create a mountpoint for the external drive and ncdata
+sudo mkdir /media/ncp
+
+# Find UUID of external drive
+ls -lh /dev/disk/by-uuid/
+
+---
+lrwxrwxrwx 1 root root 10 Feb 13 16:10 cd4888da-6f03-4799-aa94-16f7e61039a7 -> ../../sda1
+---
+
+# Update /etc/fstab, add below line:
+# UUID=YourDrive’sUUID /media/ncp ext4 rw,users 0 0
+sudo nano /etc/fstab
+---
+UUID=cd4888da-6f03-4799-aa94-16f7e61039a7 /media/ncp ext4 rw,users 0 0
+---
+
+# Mount the drive
+sudo mount -a
+
+# Create a new directory for ncdata as for example
+sudo mkdir /media/ncp/ncdata
+
+
+docker run -d \
+  -p 4443:4443 \
+  -p 443:443 \
+  -p 80:80 \
+  -v /media/ncp/ncdata:/data \
+  --name nextcloudpi \
+  ownyourbits/nextcloudpi-armhf \
+  DOMAIN
+
+# DOMAIN should be your trusted domain: the URL or IP that will be used to access.
+# Note: Make sure the IP address is static
+# Substitute x86 with armhf if your on RaspberryPi or other armfs devices.

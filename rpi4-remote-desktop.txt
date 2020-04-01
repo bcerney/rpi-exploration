@@ -14,7 +14,7 @@ gparted
 # Write Raspian image to SD
 sudo dd if=/path/to/raspbian-.img of=/dev/path/to/card bs=4M conv=fsync
 
-Enable SSH/Wifi
+# Enable SSH/Wifi
 
 # dd utility created two partitions: boot and roofs
 # go to boot, create 'ssh' file to allow SSH
