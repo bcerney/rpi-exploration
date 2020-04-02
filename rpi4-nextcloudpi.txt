@@ -93,4 +93,6 @@ sudo docker run -d \
 # Substitute x86 with armhf if your on RaspberryPi or other armfs devices.
 
 # Follow logs to confirm success
-docker logs -f nextcloudpi 
+docker logs -f nextcloudpi
+
+# https://docs.nextcloudpi.com/en/configuration-reference/#nc-admin
