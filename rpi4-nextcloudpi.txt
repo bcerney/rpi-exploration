@@ -66,7 +66,7 @@ lrwxrwxrwx 1 root root 10 Feb 13 16:10 cd4888da-6f03-4799-aa94-16f7e61039a7 -> .
 ---
 
 # Update /etc/fstab, add below line:
-# UUID=YourDrive’sUUID /media/ncp ext4 rw,users 0 0
+# UUID=YourDrive’sUUID /media/ncp ext4 rw,users,exec 0 0
 sudo nano /etc/fstab
 ---
 UUID=cd4888da-6f03-4799-aa94-16f7e61039a7 /media/ncp ext4 rw,users 0 0
@@ -79,7 +79,7 @@ sudo mount -a
 sudo mkdir /media/ncp/ncdata
 
 
-docker run -d \
+sudo docker run -d \
   -p 4443:4443 \
   -p 443:443 \
   -p 80:80 \
@@ -91,3 +91,6 @@ docker run -d \
 # DOMAIN should be your trusted domain: the URL or IP that will be used to access.
 # Note: Make sure the IP address is static
 # Substitute x86 with armhf if your on RaspberryPi or other armfs devices.
+
+# Follow logs to confirm success
+docker logs -f nextcloudpi 
