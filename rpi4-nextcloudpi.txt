@@ -78,7 +78,7 @@ sudo mount -a
 # Create a new directory for ncdata as for example
 sudo mkdir /media/ncp/ncdata
 
-
+# Run
 sudo docker run -d \
   -p 4443:4443 \
   -p 443:443 \
@@ -95,4 +95,14 @@ sudo docker run -d \
 # Follow logs to confirm success
 docker logs -f nextcloudpi
 
+# Make sure container re-starts, unless manually stopped
+docker update --restart=unless-stopped nextcloudpi
+
 # https://docs.nextcloudpi.com/en/configuration-reference/#nc-admin
+
+# Disabling Wifi
+# https://github.com/raspberrypi/firmware/blob/master/boot/overlays/README
+nano /boot/config.txt
+
+# Add below line
+dtoverlay=disable-wifi
