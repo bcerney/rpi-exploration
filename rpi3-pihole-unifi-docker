@@ -1,0 +1,122 @@
+# go to boot, create 'ssh' file to allow SSH
+touch ssh
+
+# create wifi config
+touch wpa_supplicant.conf
+---
+country=US
+ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
+update_config=1
+
+network={
+    ssid="Your network name, e.g. BTHub1-123QWE"
+    psk="Y0ur_P455w0rd"
+    key_mgmt=WPA-PSK
+}
+---
+
+# Find pi via nmap
+sudo nmap -sS -p 22 192.168.1.0/24 | grep "Nmap scan"
+
+# SSH into pi
+ssh pi@192.168.1.X
+
+#passwd to change
+passwd
+
+# updates
+sudo apt update && sudo apt upgrade
+
+
+# Install Docker
+# https://www.raspberrypi.org/blog/docker-comes-to-raspberry-pi/
+# https://docs.docker.com/install/linux/docker-ce/debian/#install-using-the-convenience-script
+
+
+#For Raspbian, installing using the repository is not yet supported. You must instead use the convenience script.
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo usermod -aG docker pi
+newgrp docker
+
+# Install Docker Compose
+# https://withblue.ink/2019/07/13/yes-you-can-run-docker-on-raspbian.html
+
+
+# Install required packages
+sudo apt update
+sudo apt install -y python3-pip libffi-dev
+
+# Install Docker Compose from pip (using Python3)
+sudo pip3 install docker-compose
+
+# Create docker-compose-pihole.yml
+# https://github.com/pi-hole/docker-pi-hole/#running-pi-hole-docker
+
+version: "3"
+
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "80:80/tcp"
+      - "443:443/tcp"
+    environment:
+      TZ: 'America/New_York'
+      # WEBPASSWORD: 'set a secure password here or it will be random'
+      DNS1: 1.1.1.1
+      DNS2: no
+    # Volumes store your data between container upgrades
+    volumes:
+      - './etc-pihole/:/etc/pihole/'
+      - './etc-dnsmasq.d/:/etc/dnsmasq.d/'
+    dns:
+      - 127.0.0.1
+      - 1.1.1.1
+    # Recommended but not required (DHCP needs NET_ADMIN)
+    #   https://github.com/pi-hole/docker-pi-hole#note-on-capabilities
+    cap_add:
+     - NET_ADMIN
+    restart: unless-stopped
+
+# UniFi on pi
+# https://tynick.com/blog/09-08-2019/unifi-controller-with-raspberry-pi-and-docker/
+# https://hub.docker.com/r/jacobalberty/unifi
+
+docker run -d --restart=unless-stopped --init -p 8080:8080 -p 8443:8443 -p 3478:3478/udp -p 10001:10001/udp -e TZ='America/New_York' -v /home/pi/unifi:/unifi --name unifipi jacobalberty/unifi:arm32v7
+
+# setup user/password
+
+# Move from old controller
+
+
+
+# user/pw for SSHing to AP: https://community.ui.com/questions/username-password-for-ssh-to-unifi-ap/d94239d5-e162-49ad-92cd-a66e053b9322
+# https://chrisjean.com/ssh-into-ubiquiti-access-point/
+# https://community.ui.com/questions/UniFi-AP-SSH-factory-default-commands/3da23434-111f-4c5f-8f90-c53207cbaced
+
+
+# Restore AP to factory default
+syswrapper.sh restore-default
+
+# Connection lost, wait for restart
+
+https://www.ui.com/download/unifi/#
+
+# Couldn't resolve issues with first image: https://hub.docker.com/r/jacobalberty/unifi
+# Trying with new image
+# https://homenetworkguy.com/how-to/install-unifi-controller-on-raspberry-pi-with-docker/
+
+mkdir unifi && cd unifi
+curl -O https://raw.githubusercontent.com/ryansch/docker-unifi-rpi/master/docker-compose.yml
+sudo docker-compose up -d
+
+
+# RPi3 Kali dump
+# http://www.lcdwiki.com/MHS-3.5inch_RPi_Display
+# 
